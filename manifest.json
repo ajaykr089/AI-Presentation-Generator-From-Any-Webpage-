@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "AI Presentation Generator",
+  "version": "1.0",
+  "description": "Convert webpage content into structured presentations using AI",
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Generate Presentation"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
+}

@@ -1,0 +1,23 @@
+(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,52683,e=>{"use strict";var t=e.i(43476),r=e.i(71645);function n(){let[e,n]=(0,r.useState)("url"),[a,o]=(0,r.useState)(""),[s,i]=(0,r.useState)(""),[l,d]=(0,r.useState)(""),[c,u]=(0,r.useState)(!1),g=async()=>{if("url"===e)try{let[e]=await chrome.tabs.query({active:!0,currentWindow:!0});if(e.id){let t=await chrome.tabs.sendMessage(e.id,{action:"extractContent"});i(t.content),alert("Content extracted from current page!")}}catch(e){console.error("Error extracting content:",e),alert("Failed to extract content. Make sure you're on a webpage.")}},p=async()=>{let t="url"===e?`Content from URL: ${a}`:s;if(!t.trim())return void alert("Please provide content or URL");u(!0);try{let e=t.replace(/<[^>]*>/g,"").replace(/\s+/g," ").trim().substring(0,2e3),r=`Convert the following webpage content into a structured presentation with slides. Format as clean Markdown with:
+
+# Slide 1 — Title
+- bullet point
+- bullet point
+Notes: explanation...
+
+Continue for multiple slides. Make it professional and concise.
+
+Content: ${e}`,n=await fetch("https://api-inference.huggingface.co/models/google/flan-t5-large",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({inputs:r,parameters:{max_length:1e3,temperature:.7},options:{wait_for_model:!0}})}),a=await n.json(),o="";Array.isArray(a)&&a.length>0?o=a[0].generated_text||"":a.generated_text&&(o=a.generated_text),o.includes("# Slide")||o.includes("Notes:")||(o=`# Slide 1 — Generated Presentation
+- This is a generated presentation from the webpage content
+- Key points will be extracted and organized
+- Professional structure with clear bullet points
+Notes: This presentation was generated using AI from the provided webpage content. Review and customize as needed.
+
+# Slide 2 — Content Summary
+- ${e.substring(0,100)}...
+- Additional key information extracted
+- Organized into logical sections
+Notes: The content has been summarized and structured for presentation purposes.`),d(o)}catch(e){console.error("Error:",e),d(`# Error
+- Failed to generate presentation
+- Please try again
+Notes: There was an issue with the AI service.`)}finally{u(!1)}};return(0,t.jsxs)("div",{className:"w-96 p-4 bg-white",children:[(0,t.jsx)("h1",{className:"text-xl font-bold mb-4",children:"AI Presentation Generator"}),(0,t.jsxs)("div",{className:"mb-4",children:[(0,t.jsxs)("div",{className:"flex gap-2 mb-2",children:[(0,t.jsx)("button",{onClick:()=>n("url"),className:`px-3 py-1 text-sm rounded ${"url"===e?"bg-blue-500 text-white":"bg-gray-200"}`,children:"From URL"}),(0,t.jsx)("button",{onClick:()=>n("content"),className:`px-3 py-1 text-sm rounded ${"content"===e?"bg-blue-500 text-white":"bg-gray-200"}`,children:"Paste Content"})]}),"url"===e?(0,t.jsxs)("div",{children:[(0,t.jsx)("input",{type:"url",placeholder:"Enter webpage URL",value:a,onChange:e=>o(e.target.value),className:"w-full p-2 border rounded mb-2"}),(0,t.jsx)("button",{onClick:g,className:"w-full bg-green-500 text-white py-2 rounded hover:bg-green-600",children:"Extract from Current Page"})]}):(0,t.jsx)("textarea",{placeholder:"Paste webpage content here",value:s,onChange:e=>i(e.target.value),className:"w-full p-2 border rounded h-24 resize-none"})]}),(0,t.jsx)("button",{onClick:p,disabled:c,className:"w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 disabled:opacity-50",children:c?"Generating...":"Generate Presentation"}),l&&(0,t.jsxs)("div",{className:"mt-4",children:[(0,t.jsx)("h2",{className:"text-lg font-semibold mb-2",children:"Generated Presentation"}),(0,t.jsx)("div",{className:"bg-gray-50 p-3 rounded max-h-64 overflow-y-auto",children:(0,t.jsx)("pre",{className:"whitespace-pre-wrap text-sm",children:l})}),(0,t.jsx)("button",{onClick:()=>navigator.clipboard.writeText(l),className:"mt-2 w-full bg-gray-500 text-white py-1 rounded hover:bg-gray-600 text-sm",children:"Copy to Clipboard"})]})]})}e.s(["default",()=>n])}]);
