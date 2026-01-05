@@ -5,6 +5,58 @@ import { useState } from 'react';
 const MODEL_ID = "google/flan-t5-large";
 const HF_API_URL = `https://api-inference.huggingface.co/models/${MODEL_ID}`;
 
+function extractWebpageContent(): string {
+  // Remove scripts, styles, and other irrelevant elements
+  const clonedDoc = document.cloneNode(true) as Document;
+
+  // Remove unwanted elements
+  const selectorsToRemove = [
+    'script', 'style', 'nav', 'header', 'footer', 'aside',
+    '.sidebar', '.menu', '.navigation', '.footer', '.ads',
+    '.advertisement', '.popup', '.modal', '[role="banner"]',
+    '[role="navigation"]', '[role="complementary"]'
+  ];
+
+  selectorsToRemove.forEach(selector => {
+    const elements = clonedDoc.querySelectorAll(selector);
+    elements.forEach((el: Element) => el.remove());
+  });
+
+  // Extract main content
+  let content = '';
+
+  // Try to find main content areas
+  const mainSelectors = [
+    'main', 'article', '.content', '.post', '.entry',
+    '[role="main"]', '.main-content', '#content', '#main'
+  ];
+
+  for (const selector of mainSelectors) {
+    const element = clonedDoc.querySelector(selector);
+    if (element && element.textContent && element.textContent.trim().length > 100) {
+      content = element.textContent.trim();
+      break;
+    }
+  }
+
+  // Fallback to body if no main content found
+  if (!content) {
+    const body = clonedDoc.querySelector('body');
+    if (body && body.textContent) {
+      content = body.textContent.trim();
+    }
+  }
+
+  // Clean up the content
+  content = content
+    .replace(/\s+/g, ' ')  // Replace multiple whitespace with single space
+    .replace(/[\n\r]+/g, ' ')  // Replace newlines with space
+    .trim();
+
+  // Limit length for API
+  return content.substring(0, 5000);
+}
+
 export default function Home() {
   const [inputType, setInputType] = useState<'url' | 'content'>('url');
   const [url, setUrl] = useState('');
@@ -18,10 +70,17 @@ export default function Home() {
         // Get current tab
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
         if (tab.id) {
-          // Send message to content script
-          const response = await chrome.tabs.sendMessage(tab.id, { action: 'extractContent' });
-          setContent(response.content);
-          alert('Content extracted from current page!');
+          // Execute script directly on the tab
+          const results = await chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            func: extractWebpageContent
+          });
+          if (results && results[0] && results[0].result) {
+            setContent(results[0].result as string);
+            alert('Content extracted from current page!');
+          } else {
+            alert('No content found on the page.');
+          }
         }
       } catch (error) {
         console.error('Error extracting content:', error);
